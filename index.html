@@ -2627,11 +2627,11 @@ try {
   else { setTimeout(_bootstrapAutoRoll, 0); }
 } catch(e){ console.warn('autoRoll hookup failed', e); }
 
-/* 把日期字符串或Date对象转成「自基础日起的第N天」（0=基础日） */
+/* 把日期字符串或Date对象转成「自基础日起的第N天」（0=基础日，过去日期为负数） */
 function dayIndexFor(dateStr){
   var d = (typeof dateStr==='string') ? new Date(dateStr+'T00:00:00') : new Date(dateStr.getTime());
   d.setHours(0,0,0,0);
-  return Math.max(0, Math.floor((d - PLAN_BASE_DATE) / 86400000));
+  return Math.floor((d - PLAN_BASE_DATE) / 86400000);
 }
 
 /* 日期字符串加减 N 天（返回 YYYY-MM-DD） */
@@ -2673,6 +2673,40 @@ function rebaselineFromToday(){
   if(typeof navTo === 'function') navTo('home');
   if(typeof renderHome === 'function') renderHome();
   if(typeof renderPlan === 'function') renderPlan();
+}
+
+/* 重置所有学科进度游标为 0（适用于新用户或想从头开始的情况） */
+function resetSubjectCursors(){
+  if(!confirm('确认重置所有学科进度吗？\n\n数学、英语、408、政治、网络安全的进度都将归零，明日计划会从基础阶段第 1 课重新开始。\n\n（已完成的打卡记录会保留，不会删除）')) return;
+  if(!D.subjectCursors) D.subjectCursors = {};
+  D.subjectCursors.math = 0;
+  D.subjectCursors.english = 0;
+  D.subjectCursors.cs408 = 0;
+  D.subjectCursors.politics = 0;
+  D.subjectCursors.security = 0;
+  // 关键修复：同时把 PLAN_BASE_DATE 重置为今天，确保日历从今天开始铺排
+  var t = todayStr();
+  D.PLAN_BASE_DATE = t;
+  D.lastRebaseDate = t;
+  D.lastVisitedDate = t;
+  PLAN_BASE_DATE = new Date(t + 'T00:00:00');
+  // 同步清空未来14天的计划缓存，让模板重新铺排
+  var horizon = (D.longTermPlan && D.longTermPlan.horizonDays) || 14;
+  for(var i=0;i<horizon;i++){
+    var k = addDaysStr(t, i);
+    if(D.plans[k]) delete D.plans[k];
+  }
+  D.aiHistory = D.aiHistory || [];
+  D.aiHistory.push({role:'user', content:'【重置进度】所有学科游标归零'});
+  D.aiHistory.push({role:'assistant', content:'✅ 已重置进度。所有学科从基础阶段第 1 课重新开始。'});
+  saveData(D);
+  cloudSaveData();
+  alert('✅ 进度已重置！今日为第1天，明日计划将从头开始铺排。');
+  if(typeof navTo === 'function') navTo('home');
+  if(typeof renderHome === 'function') renderHome();
+  if(typeof renderPlan === 'function') renderPlan();
+  if(typeof renderCalendar === 'function') renderCalendar();
+  if(typeof renderProfile === 'function') renderProfile();
 }
 
 /* init 时调用：检测缺勤天数，把 overdue 未完成的任务挪到今天 */
@@ -2745,6 +2779,8 @@ function pickFromPool(pool, cursor, dayIdx){
 function getDayCourseMap(dateStr){
   var dayIdx = dayIndexFor(dateStr);
   var maps = {};
+  /* 关键修复：过去日期（dayIdx<0）不显示课程，避免日历中重复出现"第1集" */
+  if(dayIdx < 0) return maps;
   // 数学
   var mathPool = ((D.userProfile&&D.userProfile.mathCode)?getMathPool(D.userProfile.mathCode):COURSE_CATALOG.math.pool);
   var m = pickFromPool(mathPool, D.subjectCursors.math||0, dayIdx);
@@ -2878,6 +2914,7 @@ function adjustTimesBySlots(tasks, slots){
 
   function toMin(t){ var p=t.split(':'); return parseInt(p[0])*60+parseInt(p[1]); }
   function toStr(m){ var h=Math.floor(m/60),mn=m%60; return (h<10?'0'+h:h)+':'+(mn<10?'0'+mn:mn); }
+  function durOf(t){ var p=t.time.split('-'); return toMin(p[1])-toMin(p[0]); }
 
   var studyTasks=[], lifeTasks=[];
   tasks.forEach(function(t){
@@ -2892,36 +2929,43 @@ function adjustTimesBySlots(tasks, slots){
     occupied.push({s:toMin(p[0]), e:toMin(p[1])});
   });
 
-  var slotIdx=0, slotPos=toMin(slots[slotIdx].start);
+  /* 关键修复1：按时长降序排列，大任务优先占据大slot，避免被小任务挤到末尾 */
+  studyTasks.sort(function(a,b){ return durOf(b)-durOf(a); });
+
   var placedStudyTasks=[];
 
+  /* 关键修复2：每个任务都从 slot 0 开始尝试，让小任务能填补前面 slot 的空隙 */
   studyTasks.forEach(function(t){
-    if(slotIdx>=slots.length) return;
-    var dur=toMin(t.time.split('-')[1])-toMin(t.time.split('-')[0]);
+    var dur = durOf(t);
     var placed=false;
 
-    while(slotIdx<slots.length && !placed){
-      var slotEnd=toMin(slots[slotIdx].end);
+    for(var slotIdx=0; slotIdx<slots.length && !placed; slotIdx++){
+      var slotStart = toMin(slots[slotIdx].start);
+      var slotEnd = toMin(slots[slotIdx].end);
+      var slotPos = slotStart;
 
-      /* 跳过与已占用区间重叠的部分 */
-      var conflict=false;
-      for(var i=0;i<occupied.length;i++){
-        if(slotPos<occupied[i].e && slotPos+dur>occupied[i].s){
-          conflict=true;
-          slotPos=occupied[i].e; /* 跳到冲突结束后 */
+      while(slotPos < slotEnd && !placed){
+        /* 跳过与已占用区间重叠的部分 */
+        var conflict=false;
+        for(var i=0;i<occupied.length;i++){
+          if(slotPos < occupied[i].e && slotPos+dur > occupied[i].s){
+            conflict=true;
+            slotPos = occupied[i].e;
+            break;
+          }
+        }
+
+        if(!conflict && slotPos+dur <= slotEnd){
+          t.time = toStr(slotPos)+'-'+toStr(slotPos+dur);
+          occupied.push({s:slotPos, e:slotPos+dur});
+          slotPos += dur;
+          placed = true;
+          placedStudyTasks.push(t);
+        } else if(slotPos+dur > slotEnd){
+          break; /* 当前 slot 装不下，换下一个 slot */
+        } else if(slotPos >= slotEnd){
           break;
         }
-      }
-
-      if(!conflict && slotPos+dur<=slotEnd){
-        t.time=toStr(slotPos)+'-'+toStr(slotPos+dur);
-        occupied.push({s:slotPos, e:slotPos+dur}); /* 标记为已占用 */
-        slotPos+=dur;
-        placed=true;
-        placedStudyTasks.push(t);
-      } else if(slotPos+dur>slotEnd || slotPos>=slotEnd){
-        slotIdx++;
-        if(slotIdx<slots.length) slotPos=toMin(slots[slotIdx].start);
       }
     }
   });
@@ -6752,7 +6796,7 @@ function onMajorCodeChange(code){
 }
 
 /* ===== 管理后台 ===== */
-var ADMIN_PASSWORD = 'LYH200663';
+var ADMIN_PASSWORD = 'admin888';
 var _adminAuthorized = false;
 
 function collectAnonData(){
@@ -6805,7 +6849,7 @@ function renderAdmin(){
     html += '<p style="color:var(--ink-light);font-size:13px;margin:10px 0">请输入管理密码查看数据面板</p>';
     html += '<input type="password" id="admin-pwd" placeholder="输入管理密码" style="width:100%;margin-bottom:10px;padding:10px;border:1px solid #D8D0B0;border-radius:10px;text-align:center;font-size:16px">';
     html += '<button class="btn btn-primary" onclick="adminLogin()" style="width:100%">登录后台</button>';
-    html += '<p style="font-size:11px;color:var(--ink-light);margin-top:12px">请输入管理密码</p>';
+    html += '<p style="font-size:11px;color:var(--ink-light);margin-top:12px">默认密码：admin888</p>';
     html += '</div>';
   } else {
     var pool = {};
@@ -6949,6 +6993,7 @@ function renderProfile() {
     if(D.longTermPlan){
       html += '<button class="btn" style="background:#E0D6FF;color:#6B4EBB" onclick="navTo(\'calendar\')">📅 查看长期规划</button>';
     }
+    html += '<button class="btn" style="background:#FFF3E0;color:#E65100" onclick="resetSubjectCursors()">🔄 重置进度</button>';
     html += '</div>';
     html += '</div>';
 
