@@ -1,0 +1,17 @@
+# ===== 运行时 / 构建产物（不入库）=====
+node.exe
+_internal/
+帮帮林.exe
+server-data/
+__pycache__/
+*.pyc
+
+# ===== PyInstaller 临时目录 =====
+build/
+dist/
+*.spec
+
+# ===== 系统 / 编辑器 =====
+.DS_Store
+Thumbs.db
+desktop.ini

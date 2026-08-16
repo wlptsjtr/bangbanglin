@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>帮帮林 · 管理端</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+body{background:#0F1A2E;color:#E5E9F0;min-height:100vh;padding:20px;}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;background:#1B2740;border-radius:14px;margin-bottom:18px;border:1px solid #2D3A55;}
+.hdr h1{font-size:20px;color:#F7B731;font-weight:600;}
+.hdr .info{font-size:12px;color:#8E96A8;}
+.hdr .info b{color:#F7B731;font-weight:600;}
+.tabbar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.tab{padding:10px 18px;background:#1B2740;border-radius:10px;cursor:pointer;border:1px solid #2D3A55;font-size:14px;color:#B8C0D0;}
+.tab.active{background:#F7B731;color:#0F1A2E;font-weight:600;border-color:#F7B731;}
+.card{background:#1B2740;border-radius:14px;padding:22px;margin-bottom:18px;border:1px solid #2D3A55;}
+.card h2{font-size:16px;color:#F7B731;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.card h2 small{font-size:12px;color:#8E96A8;font-weight:400;}
+.btn{padding:8px 16px;background:#2D3A55;color:#E5E9F0;border:0;border-radius:8px;cursor:pointer;font-size:13px;margin-right:6px;}
+.btn:hover{background:#3D4A65;}
+.btn.primary{background:#F7B731;color:#0F1A2E;font-weight:600;}
+.btn.danger{background:#E74C3C;color:#fff;}
+.btn.ok{background:#27AE60;color:#fff;}
+input,select,textarea{background:#0F1A2E;border:1px solid #2D3A55;color:#E5E9F0;padding:8px 12px;border-radius:8px;width:100%;font-size:13px;margin:4px 0;}
+textarea{min-height:60px;font-family:monospace;}
+.kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
+.kpi .box{background:#1B2740;border-radius:12px;padding:18px;border-left:4px solid #F7B731;}
+.kpi .box.b{border-color:#3498DB;}
+.kpi .box.g{border-color:#27AE60;}
+.kpi .box.r{border-color:#E74C3C;}
+.kpi .num{font-size:28px;font-weight:700;color:#F7B731;}
+.kpi .lbl{font-size:12px;color:#8E96A8;margin-top:6px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #2D3A55;}
+th{background:#243149;color:#F7B731;font-weight:600;font-size:12px;text-transform:uppercase;}
+tr:hover{background:#243149;}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;background:#2D3A55;color:#B8C0D0;}
+.tag.admin{background:#E74C3C;color:#fff;}
+.tag.user{background:#3498DB;color:#fff;}
+.tag.live{background:#27AE60;color:#fff;}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.bar{height:6px;background:#2D3A55;border-radius:3px;overflow:hidden;margin-top:4px;}
+.bar > div{height:100%;background:linear-gradient(90deg,#F7B731,#E74C3C);}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;}
+.modal.show{display:flex;}
+.modal .box{background:#1B2740;border-radius:14px;padding:24px;width:min(580px,92vw);max-height:88vh;overflow:auto;border:1px solid #2D3A55;}
+.modal h3{color:#F7B731;margin-bottom:14px;}
+.empty{color:#8E96A8;font-size:13px;text-align:center;padding:30px 0;}
+.scrollable{max-height:65vh;overflow:auto;}
+.muted{color:#8E96A8;}
+.link{color:#3498DB;text-decoration:underline;cursor:pointer;}
+.official-link{font-size:11px;color:#27AE60;}
+.compare-mark{color:#27AE60;font-size:14px;}
+.compare-warn{color:#E74C3C;font-size:14px;}
+.danger-zone{background:#2A1A1A;border:1px solid #5C2A2A;padding:12px;border-radius:8px;margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>🐱 帮帮林 · 管理后台</h1>
+  <div class="info">
+    <span>已登录：<b id="admin-email">未登录</b></span>
+    &nbsp;|&nbsp;
+    <span id="admin-time"></span>
+    &nbsp;|&nbsp;
+    <button class="btn" onclick="logout()">退出</button>
+  </div>
+</div>
+
+<!-- 无会话提示（统一登录原则：管理端不再有独立口令登录） -->
+<div id="no-auth" class="card" style="max-width:520px;margin:60px auto;text-align:center;">
+  <h2>🔐 管理员入口</h2>
+  <div class="muted" style="margin-bottom:14px;font-size:13px;line-height:1.8;text-align:left;">
+    帮帮林只有一个登录界面——请前往<strong style="color:#F7B731">用户端</strong>登录。<br>
+    使用管理员账户 <code style="background:#0F1A2E;padding:2px 6px;border-radius:4px;color:#F7B731">2815097621@qq.com</code> 登录后，<br>
+    页面会出现「🛠 进入管理端」按钮，点击即可进入本后台。
+  </div>
+  <div style="margin-top:14px;">
+    <button class="btn primary" id="no-auth-go">立即前往用户端登录</button>
+  </div>
+  <div class="muted" style="margin-top:12px;font-size:11px;" id="no-auth-countdown">3 秒后自动跳转…</div>
+</div>
+
+<!-- 主面板（登录后显示） -->
+<div id="main-panel" style="display:none;">
+  <div class="tabbar">
+    <div class="tab active" data-tab="overview" onclick="switchTab('overview')">📊 概况</div>
+    <div class="tab" data-tab="users" onclick="switchTab('users')">👥 用户</div>
+    <div class="tab" data-tab="stats" onclick="switchTab('stats')">📈 报考统计</div>
+    <div class="tab" data-tab="exams" onclick="switchTab('exams')">📚 真题库</div>
+    <div class="tab" data-tab="jobs" onclick="switchTab('jobs')">💼 岗位库</div>
+    <div class="tab" data-tab="reports" onclick="switchTab('reports')">🚩 用户反馈</div>
+    <div class="tab" data-tab="settings" onclick="switchTab('settings')">⚙️ 设置</div>
+  </div>
+
+  <!-- 概况 -->
+  <div class="tab-content" data-tab="overview">
+    <div class="kpi">
+      <div class="box"><div class="num" id="kpi-total">-</div><div class="lbl">注册用户数</div></div>
+      <div class="box b"><div class="num" id="kpi-anon">-</div><div class="lbl">匿名上报条数</div></div>
+      <div class="box g"><div class="num" id="kpi-exams">-</div><div class="lbl">真题库条数</div></div>
+      <div class="box g"><div class="num" id="kpi-jobs">-</div><div class="lbl">岗位库条数</div></div>
+      <div class="box r"><div class="num" id="kpi-reports">-</div><div class="lbl">未处理反馈</div></div>
+    </div>
+    <div class="card">
+      <h2>🚀 快速操作</h2>
+      <button class="btn primary" onclick="doRefresh()">🌐 联网刷新真题/岗位</button>
+      <button class="btn" onclick="adminGetAll()">🔄 刷新数据</button>
+      <button class="btn ok" onclick="window.open('/')">↗ 打开用户端（新窗口）</button>
+      <button class="btn danger" onclick="purgeAllAnon()">🗑 清空所有匿名上报（谨慎）</button>
+      <div id="refresh-result" style="margin-top:10px;font-size:12px;color:#B8C0D0;"></div>
+    </div>
+    <div class="card">
+      <h2>🔗 联网源配置 <small>当前联网源</small></h2>
+      <div class="muted" style="font-size:12px;margin-bottom:8px;">
+        设置环境变量后重启 <code style="background:#0F1A2E;padding:2px 6px;border-radius:4px;">server.js</code> 即可生效：
+      </div>
+      <div class="row">
+        <div>
+          <label class="muted" style="font-size:12px;">EXAMS_SOURCE（真题 JSON URL）</label>
+          <input id="cfg-exams-src" placeholder="例如 https://example.com/exams.json">
+        </div>
+        <div>
+          <label class="muted" style="font-size:12px;">JOBS_SOURCE（岗位 JSON URL）</label>
+          <input id="cfg-jobs-src" placeholder="例如 https://example.com/jobs.json">
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <label class="muted" style="font-size:12px;">OFFICIAL_PORTAL（官方参照，用于「对比官网查误」）</label>
+        <input id="cfg-official" placeholder="例如 https://yz.chsi.com.cn">
+      </div>
+      <div class="muted" style="font-size:12px;margin-top:6px;">
+        当前值：EXAMS_SOURCE=<code id="show-exams-src" style="background:#0F1A2E;padding:1px 6px;border-radius:4px;">（未配置）</code>；
+        JOBS_SOURCE=<code id="show-jobs-src" style="background:#0F1A2E;padding:1px 6px;border-radius:4px;">（未配置）</code>；
+        OFFICIAL_PORTAL=<code id="show-official" style="background:#0F1A2E;padding:1px 6px;border-radius:4px;">https://yz.chsi.com.cn</code>
+      </div>
+      <button class="btn primary" style="margin-top:10px;" onclick="showCfgHelp()">📘 如何配置真正的外部数据源</button>
+    </div>
+    <div class="card">
+      <h2>📦 数据存储位置</h2>
+      <div class="muted" style="font-size:12px;">所有用户数据、报考统计、真题岗位、用户反馈，均存于：</div>
+      <code style="display:block;background:#0F1A2E;padding:10px;border-radius:8px;margin-top:8px;color:#F7B731;">./server-data/{users,anon,exams,jobs,reports}.json</code>
+      <div class="muted" style="font-size:12px;margin-top:6px;">直接复制此目录即可备份 / 迁移。</div>
+    </div>
+  </div>
+
+  <!-- 用户 -->
+  <div class="tab-content" data-tab="users" style="display:none;">
+    <div class="card">
+      <h2>👥 用户列表 <small id="users-count">-</small>
+        <span><input type="text" id="users-search" placeholder="按邮箱 / 学校 / 目标院校过滤" oninput="renderUsers()" style="width:240px;"></span>
+      </h2>
+      <div class="scrollable">
+        <table>
+          <thead><tr><th>邮箱</th><th>角色</th><th>本科学校</th><th>本科专业</th><th>目标院校</th><th>目标专业</th><th>考研年份</th><th>统考代码</th><th>注册时间</th><th>最近活动</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 报考统计 -->
+  <div class="tab-content" data-tab="stats" style="display:none;">
+    <div class="card">
+      <h2>📈 考试人数概况 <small>基于「报考信息收集」聚合（去重后）</small></h2>
+      <div class="kpi" style="margin-top:8px;">
+        <div class="box"><div class="num" id="s-total">-</div><div class="lbl">上报人数（去重）</div></div>
+        <div class="box b"><div class="num" id="s-raw">-</div><div class="lbl">总上报条数</div></div>
+        <div class="box g"><div class="num" id="s-school-top">-</div><div class="lbl">最热门目标院校</div></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card">
+        <h2>🏫 目标院校 Top <small>点击可下钻（TODO）</small></h2>
+        <table>
+          <thead><tr><th>目标院校</th><th>人数</th><th>占比</th></tr></thead>
+          <tbody id="t-school"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>📘 统考代码 Top</h2>
+        <table>
+          <thead><tr><th>代码</th><th>人数</th><th>占比</th></tr></thead>
+          <tbody id="t-major"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="card">
+        <h2>📅 考研年份分布</h2>
+        <table>
+          <thead><tr><th>年份</th><th>人数</th><th>占比</th></tr></thead>
+          <tbody id="t-year"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h2>🛤 路线分布</h2>
+        <table>
+          <thead><tr><th>路线</th><th>人数</th><th>占比</th></tr></thead>
+          <tbody id="t-path"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 真题 -->
+  <div class="tab-content" data-tab="exams" style="display:none;">
+    <div class="card">
+      <h2>📚 真题库 <small>对比官网查误</small>
+        <span>
+          <button class="btn ok" onclick="showExamForm()">➕ 新增真题</button>
+          <button class="btn" onclick="doRefresh()">🌐 联网刷新</button>
+        </span>
+      </h2>
+      <div class="muted" style="font-size:12px;margin-bottom:10px;">
+        每条真题带 <b style="color:#27AE60;">官网对照</b> 链接。点击「✓ 对比」会打开对比窗口；点击「⚠ 标为有误」可上报给管理员。
+      </div>
+      <div class="scrollable">
+        <table>
+          <thead><tr><th>#</th><th>科目/年份</th><th>标题</th><th>来源</th><th>添加时间</th><th>操作</th></tr></thead>
+          <tbody id="exams-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 岗位 -->
+  <div class="tab-content" data-tab="jobs" style="display:none;">
+    <div class="card">
+      <h2>💼 岗位库 <small>对比官网查误</small>
+        <span>
+          <button class="btn ok" onclick="showJobForm()">➕ 新增岗位</button>
+          <button class="btn" onclick="doRefresh()">🌐 联网刷新</button>
+        </span>
+      </h2>
+      <div class="mutable" style="font-size:12px;margin-bottom:10px;">
+        点击「↗ 官方」打开官方链接核对该岗位是否真实存在；点击「⚠ 标为有误」上报给管理员。
+      </div>
+      <div class="scrollable">
+        <table>
+          <thead><tr><th>#</th><th>公司</th><th>岗位</th><th>城市</th><th>专业</th><th>截止日期</th><th>官方链接</th><th>添加时间</th><th>操作</th></tr></thead>
+          <tbody id="jobs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 用户反馈 -->
+  <div class="tab-content" data-tab="reports" style="display:none;">
+    <div class="card">
+      <h2>🚩 用户反馈（真题/岗位是否有误） <small id="reports-count">-</small></h2>
+      <div class="scrollable">
+        <table>
+          <thead><tr><th>时间</th><th>类型</th><th>目标</th><th>原因</th><th>详情</th><th>上报人</th></tr></thead>
+          <tbody id="reports-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div class="tab-content" data-tab="settings" style="display:none;">
+    <div class="card">
+      <h2>⚙️ 服务器信息</h2>
+      <table>
+        <tr><td>用户端地址</td><td><code>http://&lt;host&gt;:3210</code></td></tr>
+        <tr><td>管理端地址</td><td><code>http://&lt;host&gt;:3211/admin</code></td></tr>
+        <tr><td>数据存储</td><td><code>./server-data/*.json</code></td></tr>
+        <tr><td>管理员账户</td><td><code>2815097621@qq.com</code>（密码不对外展示）</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>📜 隐私与免责 <small>用户上报的所有数据</small></h2>
+      <div class="muted" style="font-size:12px;line-height:1.8;">
+        1. 仅收集报考统计字段（目标院校/专业/代码/年份/路线），不收集姓名、手机号、身份证。<br>
+        2. 邮箱仅用于登录，由用户主动提交；用于登录后绑定该用户的报考信息。<br>
+        3. 用户端在登录前会展示隐私与知情同意，勾选后方可上报。<br>
+        4. 联网真题/岗位优先显示官方链接（sourceUrl / officialCheckUrl），请管理员定期巡检。<br>
+        5. 删除某条真题或岗位前，请用「⚠ 标为有误」查官方页面确认。
+      </div>
+    </div>
+    <div class="card danger-zone">
+      <h2 style="color:#E74C3C;">⚠ 危险操作</h2>
+      <button class="btn danger" onclick="purgeAllAnon()">🗑 清空所有匿名上报</button>
+      <div class="muted" style="font-size:11px;margin-top:6px;">操作不可撤销，仅在重新调研时使用。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/编辑真题弹窗 -->
+<div class="modal" id="exam-form-modal">
+  <div class="box">
+    <h3 id="exam-form-title">➕ 新增真题</h3>
+    <input type="hidden" id="exam-form-id">
+    <div class="row">
+      <div><label class="muted">科目</label><input id="exam-form-subject" placeholder="如 408 / 数学二 / 英语一 / 政治"></div>
+      <div><label class="muted">年份</label><input id="exam-form-year" type="number" placeholder="如 2024"></div>
+    </div>
+    <label class="muted">标题</label>
+    <input id="exam-form-title-i" placeholder="真题题目标题">
+    <label class="muted">内容 / 答案思路</label>
+    <textarea id="exam-form-content" placeholder="真题内容或答题要点"></textarea>
+    <div class="row">
+      <div><label class="muted">来源说明</label><input id="exam-form-source" placeholder="如 '408 统考回忆版'"></div>
+      <div><label class="muted">原帖/官方 URL</label><input id="exam-form-url" placeholder="如 https://yz.chsi.com.cn/..."></div>
+    </div>
+    <label class="muted">官方对照 URL（用于「对比官网查误」）</label>
+    <input id="exam-form-official" placeholder="如 https://yz.chsi.com.cn/...">
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn" onclick="closeExamForm()">取消</button>
+      <button class="btn primary" onclick="saveExam()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/编辑岗位弹窗 -->
+<div class="modal" id="job-form-modal">
+  <div class="box">
+    <h3 id="job-form-title">➕ 新增岗位</h3>
+    <input type="hidden" id="job-form-id">
+    <div class="row">
+      <div><label class="muted">公司</label><input id="job-form-company" placeholder="如 腾讯"></div>
+      <div><label class="muted">岗位</label><input id="job-form-role" placeholder="如 2027 校招·后台开发"></div>
+    </div>
+    <div class="row3">
+      <div><label class="muted">城市</label><input id="job-form-city" placeholder="如 杭州"></div>
+      <div><label class="muted">专业</label><input id="job-form-major" placeholder="如 计算机"></div>
+      <div><label class="muted">学历</label><input id="job-form-degree" placeholder="如 本科及以上"></div>
+    </div>
+    <div class="row">
+      <div><label class="muted">截止日期</label><input id="job-form-deadline" placeholder="如 2026-10-31"></div>
+      <div><label class="muted">标签</label><input id="job-form-tag" placeholder="如 大厂·Top"></div>
+    </div>
+    <label class="muted">岗位详情 URL</label>
+    <input id="job-form-url" placeholder="https://...">
+    <label class="muted">官方对照 URL</label>
+    <input id="job-form-official" placeholder="https://...">
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn" onclick="closeJobForm()">取消</button>
+      <button class="btn primary" onclick="saveJob()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 配置说明弹窗 -->
+<div class="modal" id="cfg-help-modal">
+  <div class="box">
+    <h3>📘 如何配置真正的外部数据源</h3>
+    <div class="muted" style="font-size:13px;line-height:1.8;">
+      当前 demo 模式下「联网刷新」仅写入一条演示数据。<br><br>
+      <b>要让真题/岗位真正实时联网：</b><br>
+      1. 准备一个返回 JSON 数组的 HTTPS 接口（可用 GitHub Pages / CloudBase 等）：<br>
+      &nbsp;&nbsp;<code>https://your-domain.com/exams.json</code>（数组，每项含 <code>id/title/content/subject/year</code>）<br>
+      2. 启动 server.js 时传入环境变量：<br>
+      &nbsp;&nbsp;<code>set EXAMS_SOURCE=https://your-domain.com/exams.json</code><br>
+      &nbsp;&nbsp;<code>set JOBS_SOURCE=https://your-domain.com/jobs.json</code><br>
+      &nbsp;&nbsp;<code>node server.js</code><br>
+      3. 在本后台「联网刷新」按钮即可拉取并去重写入。<br><br>
+      <b>长期建议：</b>把采集脚本挂到云函数 / GitHub Actions，定时把官方源数据 dump 到 JSON，再让本后台拉取。
+    </div>
+    <div style="margin-top:14px;text-align:right;">
+      <button class="btn primary" onclick="document.getElementById('cfg-help-modal').classList.remove('show')">我知道了</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ADMIN_AUTH = ''; // 管理员会话 token（来自用户端统一登录后 URL ?token= 带入；sessionStorage 兜底刷新）
+var LAST_DATA = null;
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/[<>&"']/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+function api(path, opts){
+  opts = opts || {};
+  var h = { 'Content-Type':'application/json' };
+  if (ADMIN_AUTH) h['Authorization'] = 'Bearer ' + ADMIN_AUTH;
+  return fetch(path, { method: opts.method || 'GET', headers: h, body: opts.body ? JSON.stringify(opts.body) : null })
+    .then(function(r){ return r.json().then(function(j){ return { status:r.status, json:j }; }); });
+}
+
+function showTime(){
+  var d = new Date();
+  $('admin-time').textContent = d.toLocaleString('zh-CN');
+}
+setInterval(showTime, 1000); showTime();
+
+/* ===== 统一登录原则：管理端不再有自己的口令登录；只从 URL ?token= 或 sessionStorage 取会话 ===== */
+function getAdminToken(){
+  var m = window.location.search.match(/[?&]token=([^&]+)/);
+  if (m) { var t = decodeURIComponent(m[1]); try { sessionStorage.setItem('admin_token', t); } catch(e){} return t; }
+  try { return sessionStorage.getItem('admin_token') || ''; } catch(e) { return ''; }
+}
+function userLoginUrl(){
+  return window.location.protocol + '//' + window.location.hostname + ':3210/';
+}
+function goUserLogin(){
+  window.location.href = userLoginUrl();
+}
+function showNoAuth(extraMsg){
+  var na = $('no-auth'); if (na) na.style.display = 'block';
+  var mp = $('main-panel'); if (mp) mp.style.display = 'none';
+  var cd = $('no-auth-countdown');
+  if (cd) cd.innerHTML = (extraMsg || '请前往用户端登录。') + ' <span style="color:#F7B731;">3 秒后自动跳转…</span>';
+  var btn = $('no-auth-go'); if (btn) btn.onclick = goUserLogin;
+  setTimeout(function(){ var na2 = $('no-auth'); if (na2 && na2.style.display !== 'none') goUserLogin(); }, 3000);
+}
+function bootstrapAdmin(){
+  var token = getAdminToken();
+  if (!token) { showNoAuth('未检测到管理员会话。'); return; }
+  ADMIN_AUTH = token;
+  api('/api/admin?token=' + encodeURIComponent(token))
+    .then(function(r){
+      if (r.status === 200 && r.json.ok){
+        $('admin-email').textContent = '2815097621@qq.com';
+        var na = $('no-auth'); if (na) na.style.display = 'none';
+        $('main-panel').style.display = 'block';
+        LAST_DATA = r.json;
+        renderAll();
+      } else {
+        ADMIN_AUTH = '';
+        try { sessionStorage.removeItem('admin_token'); } catch(e){}
+        showNoAuth('会话已失效（' + (r.json && r.json.error || '') + '）。请重新登录。');
+      }
+    })
+    .catch(function(){
+      ADMIN_AUTH = '';
+      showNoAuth('无法连接服务器（请确认 server.js 已启动）。');
+    });
+}
+document.addEventListener('DOMContentLoaded', bootstrapAdmin);
+
+function logout(){
+  ADMIN_AUTH = '';
+  try { sessionStorage.removeItem('admin_token'); } catch(e){}
+  goUserLogin();
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(function(el){ el.classList.toggle('active', el.getAttribute('data-tab')===name); });
+  document.querySelectorAll('.tab-content').forEach(function(el){ el.style.display = (el.getAttribute('data-tab')===name)?'block':'none'; });
+}
+
+function adminGetAll(){
+  api('/api/admin?token=' + encodeURIComponent(ADMIN_AUTH)).then(function(r){
+    if (r.json.ok){ LAST_DATA = r.json; renderAll(); }
+    else alert('拉取失败：' + r.json.error);
+  });
+}
+
+function renderAll(){
+  var d = LAST_DATA;
+  $('kpi-total').textContent  = d.totalUsers;
+  $('kpi-anon').textContent   = d.anonReports;
+  $('kpi-exams').textContent  = d.exams.items.length;
+  $('kpi-jobs').textContent   = d.jobs.items.length;
+  $('kpi-reports').textContent= (d.reports||{}).items ? d.reports.items.length : 0;
+  renderUsers();
+  renderStats();
+  renderExams();
+  renderJobs();
+  renderReports();
+}
+
+function renderUsers(){
+  var d = LAST_DATA; if (!d) return;
+  var q = ($('users-search').value || '').toLowerCase().trim();
+  var list = d.users.filter(function(u){
+    if (!q) return true;
+    var hay = (u.email+' '+u.profile.school+' '+u.profile.major+' '+u.profile.targetSchool+' '+u.profile.targetMajor).toLowerCase();
+    return hay.indexOf(q) !== -1;
+  });
+  $('users-count').textContent = list.length + ' / ' + d.totalUsers;
+  var html = list.map(function(u){
+    var p = u.profile || {};
+    return '<tr>' +
+      '<td>'+esc(u.email)+'</td>' +
+      '<td>'+ (u.isAdmin?'<span class="tag admin">管理员</span>':'<span class="tag user">用户</span>') +'</td>' +
+      '<td>'+esc(p.school)+'</td>' +
+      '<td>'+esc(p.major)+'</td>' +
+      '<td>'+esc(p.targetSchool)+'</td>' +
+      '<td>'+esc(p.targetMajor)+'</td>' +
+      '<td>'+esc(p.examYear)+'</td>' +
+      '<td>'+esc(p.majorCode)+'</td>' +
+      '<td class="muted">'+esc((u.createdAt||'').slice(0,10))+'</td>' +
+      '<td class="muted">'+esc((u.updatedAt||'').slice(0,16).replace('T',' '))+'</td>' +
+    '</tr>';
+  }).join('');
+  $('users-tbody').innerHTML = html || '<tr><td colspan="10" class="empty">暂无用户</td></tr>';
+}
+
+function renderStats(){
+  var s = LAST_DATA.stats; if (!s) return;
+  $('s-total').textContent = s.total;
+  $('s-raw').textContent = s.rawCount;
+  $('s-school-top').textContent = (s.byTargetSchool[0] && s.byTargetSchool[0].key) || '-';
+  function fill(id, arr){
+    var total = s.total || 1;
+    var rows = arr.map(function(x){
+      var pct = Math.round(x.count * 100 / total);
+      return '<tr><td>'+esc(x.key)+'</td><td>'+x.count+'</td><td><div class="bar"><div style="width:'+pct+'%"></div></div> '+pct+'%</td></tr>';
+    }).join('');
+    $(id).innerHTML = rows || '<tr><td colspan="3" class="empty">暂无</td></tr>';
+  }
+  fill('t-school', s.byTargetSchool);
+  fill('t-major', s.byMajorCode);
+  fill('t-year', s.byExamYear);
+  fill('t-path', s.byPath);
+}
+
+function renderExams(){
+  var arr = LAST_DATA.exams.items;
+  $('exams-tbody').innerHTML = arr.map(function(it, i){
+    var offUrl = it.officialCheckUrl || it.sourceUrl || '#';
+    return '<tr>' +
+      '<td>'+(i+1)+'</td>' +
+      '<td>'+esc(it.subject)+' · '+esc(it.year)+'</td>' +
+      '<td>'+esc(it.title)+(it.pulledAt?' <span class="tag live">联网</span>':'')+'</td>' +
+      '<td>'+esc(it.source)+'</td>' +
+      '<td class="muted">'+esc((it.addedAt||'').slice(0,16).replace('T',' '))+'</td>' +
+      '<td>' +
+        '<button class="btn" onclick="compareOfficial(\'exam\',\''+it.id+'\')" title="打开官方页面人工对比">↗ 官方</button>' +
+        '<button class="btn" onclick="editExam(\''+it.id+'\')">编辑</button>' +
+        '<button class="btn danger" onclick="delExam(\''+it.id+'\')">删除</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="6" class="empty">真题库为空</td></tr>';
+}
+
+function renderJobs(){
+  var arr = LAST_DATA.jobs.items;
+  $('jobs-tbody').innerHTML = arr.map(function(it, i){
+    return '<tr>' +
+      '<td>'+(i+1)+'</td>' +
+      '<td>'+esc(it.company)+(it.pulledAt?' <span class="tag live">联网</span>':'')+'</td>' +
+      '<td>'+esc(it.role)+'</td>' +
+      '<td>'+esc(it.city)+'</td>' +
+      '<td>'+esc(it.major)+'</td>' +
+      '<td>'+esc(it.deadline)+'</td>' +
+      '<td><a class="link" href="'+esc(it.url||'#')+'" target="_blank">↗ 原帖</a> · <a class="official-link" href="'+esc(it.officialCheckUrl||'#')+'" target="_blank">对照</a></td>' +
+      '<td class="muted">'+esc((it.addedAt||'').slice(0,16).replace('T',' '))+'</td>' +
+      '<td>' +
+        '<button class="btn" onclick="editJob(\''+it.id+'\')">编辑</button>' +
+        '<button class="btn danger" onclick="delJob(\''+it.id+'\')">删除</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="9" class="empty">岗位库为空</td></tr>';
+}
+
+function renderReports(){
+  var arr = (LAST_DATA.reports||{}).items || [];
+  $('reports-count').textContent = arr.length + ' 条';
+  $('reports-tbody').innerHTML = arr.map(function(r){
+    return '<tr>' +
+      '<td class="muted">'+esc((r.time||'').slice(0,16).replace('T',' '))+'</td>' +
+      '<td><span class="tag">'+esc(r.type)+'</span></td>' +
+      '<td class="muted">'+esc(r.targetId||'')+'</td>' +
+      '<td>'+esc(r.reason||'')+'</td>' +
+      '<td>'+esc(r.detail||'')+'</td>' +
+      '<td class="muted">'+esc(r.reporterEmail||'(匿名)')+'</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="6" class="empty">暂无反馈</td></tr>';
+}
+
+function compareOfficial(type, id){
+  var it;
+  if (type==='exam') it = LAST_DATA.exams.items.find(function(x){ return x.id===id; });
+  else it = LAST_DATA.jobs.items.find(function(x){ return x.id===id; });
+  if (!it) return;
+  var url = it.officialCheckUrl || it.url || OFFICIAL_PORTAL_FALLBACK;
+  var w = window.open(url, '_blank');
+  if (w) w.opener = null;
+}
+
+/* ===== 真题表单 ===== */
+function showExamForm(id){
+  $('exam-form-title').textContent = id ? '✏ 编辑真题' : '➕ 新增真题';
+  $('exam-form-id').value = id || '';
+  if (id){
+    var it = LAST_DATA.exams.items.find(function(x){ return x.id===id; });
+    if (it){
+      $('exam-form-subject').value = it.subject||'';
+      $('exam-form-year').value = it.year||'';
+      $('exam-form-title-i').value = it.title||'';
+      $('exam-form-content').value = it.content||'';
+      $('exam-form-source').value = it.source||'';
+      $('exam-form-url').value = it.url||it.sourceUrl||'';
+      $('exam-form-official').value = it.officialCheckUrl||'';
+    }
+  } else {
+    ['exam-form-subject','exam-form-year','exam-form-title-i','exam-form-content','exam-form-source','exam-form-url','exam-form-official'].forEach(function(k){ $(k).value=''; });
+  }
+  $('exam-form-modal').classList.add('show');
+}
+function closeExamForm(){ $('exam-form-modal').classList.remove('show'); }
+function editExam(id){ showExamForm(id); }
+function saveExam(){
+  var id = $('exam-form-id').value;
+  var item = {
+    subject: $('exam-form-subject').value.trim(),
+    year: parseInt($('exam-form-year').value,10) || new Date().getFullYear(),
+    title: $('exam-form-title-i').value.trim(),
+    content: $('exam-form-content').value.trim(),
+    source: $('exam-form-source').value.trim(),
+    sourceUrl: $('exam-form-url').value.trim(),
+    url: $('exam-form-url').value.trim(),
+    officialCheckUrl: $('exam-form-official').value.trim()
+  };
+  if (!item.title){ alert('请填标题'); return; }
+  var path = id ? '/api/admin/exams/update' : '/api/admin/exams';
+  api(path, { method:'POST', body: id ? { id:id, item:item, token:ADMIN_AUTH } : { item:item, token:ADMIN_AUTH } })
+    .then(function(r){
+      if (r.json.ok){ closeExamForm(); adminGetAll(); }
+      else alert('保存失败：'+r.json.error);
+    });
+}
+function delExam(id){
+  if (!confirm('确认删除真题 '+id+' ？')) return;
+  api('/api/admin/exams/delete', { method:'POST', body:{ id:id, token:ADMIN_AUTH } })
+    .then(function(r){ if (r.json.ok) adminGetAll(); else alert('删除失败'); });
+}
+
+/* ===== 岗位表单 ===== */
+function showJobForm(id){
+  $('job-form-title').textContent = id ? '✏ 编辑岗位' : '➕ 新增岗位';
+  $('job-form-id').value = id || '';
+  if (id){
+    var it = LAST_DATA.jobs.items.find(function(x){ return x.id===id; });
+    if (it){
+      ['job-form-company','job-form-role','job-form-city','job-form-major','job-form-degree','job-form-deadline','job-form-tag','job-form-url','job-form-official'].forEach(function(k){ $(k).value=''; });
+      $('job-form-company').value = it.company||'';
+      $('job-form-role').value = it.role||'';
+      $('job-form-city').value = it.city||'';
+      $('job-form-major').value = it.major||'';
+      $('job-form-degree').value = it.degree||'';
+      $('job-form-deadline').value = it.deadline||'';
+      $('job-form-tag').value = it.tag||'';
+      $('job-form-url').value = it.url||it.sourceUrl||'';
+      $('job-form-official').value = it.officialCheckUrl||'';
+    }
+  } else {
+    ['job-form-company','job-form-role','job-form-city','job-form-major','job-form-degree','job-form-deadline','job-form-tag','job-form-url','job-form-official'].forEach(function(k){ $(k).value=''; });
+  }
+  $('job-form-modal').classList.add('show');
+}
+function closeJobForm(){ $('job-form-modal').classList.remove('show'); }
+function editJob(id){ showJobForm(id); }
+function saveJob(){
+  var id = $('job-form-id').value;
+  var item = {
+    company: $('job-form-company').value.trim(),
+    role: $('job-form-role').value.trim(),
+    city: $('job-form-city').value.trim(),
+    major: $('job-form-major').value.trim(),
+    degree: $('job-form-degree').value.trim(),
+    deadline: $('job-form-deadline').value.trim(),
+    tag: $('job-form-tag').value.trim(),
+    url: $('job-form-url').value.trim(),
+    sourceUrl: $('job-form-url').value.trim(),
+    officialCheckUrl: $('job-form-official').value.trim()
+  };
+  if (!item.company || !item.role){ alert('请填公司和岗位'); return; }
+  var path = id ? '/api/admin/jobs/update' : '/api/admin/jobs';
+  api(path, { method:'POST', body: id ? { id:id, item:item, token:ADMIN_AUTH } : { item:item, token:ADMIN_AUTH } })
+    .then(function(r){
+      if (r.json.ok){ closeJobForm(); adminGetAll(); }
+      else alert('保存失败：'+r.json.error);
+    });
+}
+function delJob(id){
+  if (!confirm('确认删除岗位 '+id+' ？')) return;
+  api('/api/admin/jobs/delete', { method:'POST', body:{ id:id, token:ADMIN_AUTH } })
+    .then(function(r){ if (r.json.ok) adminGetAll(); else alert('删除失败'); });
+}
+
+/* ===== 联网刷新 / 危险操作 ===== */
+function doRefresh(){
+  $('refresh-result').textContent = '正在联网刷新...';
+  api('/api/admin/refresh', { method:'POST', body:{ token:ADMIN_AUTH } }).then(function(r){
+    var res = (r.json.result || {});
+    var line = '结果：真题=' + (res.exams ? '成功' : '失败') +
+               ' / 岗位=' + (res.jobs ? '成功' : '失败') +
+               (res.note ? ' / ' + res.note : '') +
+               (res.examsErr ? ' / 真题Err: ' + res.examsErr : '') +
+               (res.jobsErr ? ' / 岗位Err: ' + res.jobsErr : '');
+    $('refresh-result').textContent = line + '  ·  ' + new Date().toLocaleString('zh-CN');
+    adminGetAll();
+  });
+}
+function purgeAllAnon(){
+  if (!confirm('确认清空所有匿名上报？此操作不可撤销！')) return;
+  if (!confirm('再次确认：清空后无法恢复，是否继续？')) return;
+  fetch('/api/admin/purge-anon', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token:ADMIN_AUTH }) })
+    .then(function(r){ return r.json(); })
+    .then(function(j){ alert(j.ok ? '已清空' : '失败：'+j.error); adminGetAll(); });
+}
+
+var OFFICIAL_PORTAL_FALLBACK = 'https://yz.chsi.com.cn';
+function showCfgHelp(){ $('cfg-help-modal').classList.add('show'); }
+</script>
+</body>
+</html>
