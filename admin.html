@@ -69,7 +69,6 @@ tr:hover{background:#243149;}
   </div>
 </div>
 
-<!-- 无会话提示（统一登录原则：管理端不再有独立口令登录） -->
 <div id="no-auth" class="card" style="max-width:520px;margin:60px auto;text-align:center;">
   <h2>🔐 管理员入口</h2>
   <div class="muted" style="margin-bottom:14px;font-size:13px;line-height:1.8;text-align:left;">
@@ -83,7 +82,6 @@ tr:hover{background:#243149;}
   <div class="muted" style="margin-top:12px;font-size:11px;" id="no-auth-countdown">3 秒后自动跳转…</div>
 </div>
 
-<!-- 主面板（登录后显示） -->
 <div id="main-panel" style="display:none;">
   <div class="tabbar">
     <div class="tab active" data-tab="overview" onclick="switchTab('overview')">📊 概况</div>
@@ -95,7 +93,6 @@ tr:hover{background:#243149;}
     <div class="tab" data-tab="settings" onclick="switchTab('settings')">⚙️ 设置</div>
   </div>
 
-  <!-- 概况 -->
   <div class="tab-content" data-tab="overview">
     <div class="kpi">
       <div class="box"><div class="num" id="kpi-total">-</div><div class="lbl">注册用户数</div></div>
@@ -146,7 +143,7 @@ tr:hover{background:#243149;}
     </div>
   </div>
 
-  <!-- 用户 -->
+  
   <div class="tab-content" data-tab="users" style="display:none;">
     <div class="card">
       <h2>👥 用户列表 <small id="users-count">-</small>
@@ -161,7 +158,7 @@ tr:hover{background:#243149;}
     </div>
   </div>
 
-  <!-- 报考统计 -->
+  
   <div class="tab-content" data-tab="stats" style="display:none;">
     <div class="card">
       <h2>📈 考试人数概况 <small>基于「报考信息收集」聚合（去重后）</small></h2>
@@ -205,7 +202,6 @@ tr:hover{background:#243149;}
     </div>
   </div>
 
-  <!-- 真题 -->
   <div class="tab-content" data-tab="exams" style="display:none;">
     <div class="card">
       <h2>📚 真题库 <small>对比官网查误</small>
@@ -226,7 +222,6 @@ tr:hover{background:#243149;}
     </div>
   </div>
 
-  <!-- 岗位 -->
   <div class="tab-content" data-tab="jobs" style="display:none;">
     <div class="card">
       <h2>💼 岗位库 <small>对比官网查误</small>
@@ -247,7 +242,6 @@ tr:hover{background:#243149;}
     </div>
   </div>
 
-  <!-- 用户反馈 -->
   <div class="tab-content" data-tab="reports" style="display:none;">
     <div class="card">
       <h2>🚩 用户反馈（真题/岗位是否有误） <small id="reports-count">-</small></h2>
@@ -260,7 +254,6 @@ tr:hover{background:#243149;}
     </div>
   </div>
 
-  <!-- 设置 -->
   <div class="tab-content" data-tab="settings" style="display:none;">
     <div class="card">
       <h2>⚙️ 服务器信息</h2>
@@ -289,7 +282,6 @@ tr:hover{background:#243149;}
   </div>
 </div>
 
-<!-- 新增/编辑真题弹窗 -->
 <div class="modal" id="exam-form-modal">
   <div class="box">
     <h3 id="exam-form-title">➕ 新增真题</h3>
@@ -315,7 +307,6 @@ tr:hover{background:#243149;}
   </div>
 </div>
 
-<!-- 新增/编辑岗位弹窗 -->
 <div class="modal" id="job-form-modal">
   <div class="box">
     <h3 id="job-form-title">➕ 新增岗位</h3>
@@ -344,7 +335,6 @@ tr:hover{background:#243149;}
   </div>
 </div>
 
-<!-- 配置说明弹窗 -->
 <div class="modal" id="cfg-help-modal">
   <div class="box">
     <h3>📘 如何配置真正的外部数据源</h3>
@@ -387,7 +377,6 @@ function showTime(){
 }
 setInterval(showTime, 1000); showTime();
 
-/* ===== 统一登录原则：管理端不再有自己的口令登录；只从 URL ?token= 或 sessionStorage 取会话 ===== */
 function getAdminToken(){
   var m = window.location.search.match(/[?&]token=([^&]+)/);
   if (m) { var t = decodeURIComponent(m[1]); try { sessionStorage.setItem('admin_token', t); } catch(e){} return t; }
@@ -574,7 +563,6 @@ function compareOfficial(type, id){
   if (w) w.opener = null;
 }
 
-/* ===== 真题表单 ===== */
 function showExamForm(id){
   $('exam-form-title').textContent = id ? '✏ 编辑真题' : '➕ 新增真题';
   $('exam-form-id').value = id || '';
@@ -622,7 +610,6 @@ function delExam(id){
     .then(function(r){ if (r.json.ok) adminGetAll(); else alert('删除失败'); });
 }
 
-/* ===== 岗位表单 ===== */
 function showJobForm(id){
   $('job-form-title').textContent = id ? '✏ 编辑岗位' : '➕ 新增岗位';
   $('job-form-id').value = id || '';
@@ -675,7 +662,6 @@ function delJob(id){
     .then(function(r){ if (r.json.ok) adminGetAll(); else alert('删除失败'); });
 }
 
-/* ===== 联网刷新 / 危险操作 ===== */
 function doRefresh(){
   $('refresh-result').textContent = '正在联网刷新...';
   api('/api/admin/refresh', { method:'POST', body:{ token:ADMIN_AUTH } }).then(function(r){

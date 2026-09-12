@@ -6,6 +6,11 @@ server-data/
 __pycache__/
 *.pyc
 
+# ===== 密钥 / 本地配置（绝不入库）=====
+.env
+*.env
+!.env.example
+
 # ===== PyInstaller 临时目录 =====
 build/
 dist/
@@ -14,6 +19,9 @@ dist/
 # ===== 软著 / 商店上架（不入库）=====
 软著材料/
 上架微软商店指南.md
+
+# ===== 打包产物（不入库，含 87MB node.exe）=====
+*.zip
 
 # ===== 系统 / 编辑器 =====
 .DS_Store

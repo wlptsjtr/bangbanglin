@@ -15,7 +15,6 @@ NODE = os.path.join(BASE, "node.exe")
 SERVER = os.path.join(BASE, "server.js")
 PORT = 3210
 ADMIN_EMAIL = "2815097621@qq.com"
-ADMIN_PWD = "LYH200663"
 
 
 def port_open(port):

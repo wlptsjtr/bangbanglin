@@ -1,0 +1,129 @@
+{
+  "updatedAt": "2026-09-12T00:00:00.000Z",
+  "source": "各校研究生院/学院官网 2026 年招生专业目录、复试录取方案与报考录取情况表（2026-09-12 人工核验）",
+  "sourceUrl": "https://yz.chsi.com.cn",
+  "items": {
+    "西安邮电大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "双非",
+      "province": "陕西",
+      "xueshuo": { "total": 65, "tongzhao": 58, "tuimian": 7, "note": "081200计科53(统考47/推免6)+083500软工12(统考11/推免1)" },
+      "zhuanshuo": { "total": 163, "tongzhao": 146, "tuimian": 17, "note": "085404计技74(统考66/推免8)+085411大数据89(统考80/推免9)" },
+      "bscore": { "xue": 265, "zhuan": 290 },
+      "sourceUrl": "https://cs.xupt.edu.cn/info/1054/1095.htm",
+      "sourceNote": "计算机学院2026复试方案+招生专业目录"
+    },
+    "西安电子科技大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "211",
+      "province": "陕西",
+      "xueshuo": { "total": 90, "tongzhao": null, "tuimian": null, "note": "081200计科70+083500软工20（拟招总数，统考拆分未公布）" },
+      "zhuanshuo": { "total": 96, "tongzhao": null, "tuimian": null, "note": "085404计技62+085405软工34（全日制拟招）" },
+      "bscore": null,
+      "sourceUrl": "https://cs.xidian.edu.cn/info/1026/23774.htm",
+      "sourceNote": "计算机科学与技术学院2026复试录取工作方案"
+    },
+    "东南大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "985",
+      "province": "江苏",
+      "xueshuo": { "total": null, "tongzhao": 31, "tuimian": null, "note": "统考计划31(081200计科19+083500软工5+140500智能7)，不含推免" },
+      "zhuanshuo": { "total": null, "tongzhao": 38, "tuimian": null, "note": "统考计划38(085404计技19+085410人工智能19)，含专项，不含推免" },
+      "bscore": { "xue": 376, "zhuan": 344 },
+      "sourceUrl": "https://yzb.seu.edu.cn/_s117/2026/0324/c6689a559253/page.psp",
+      "sourceNote": "计算机科学与工程学院2026复试录取工作细则（官方列出统考招生计划）"
+    },
+    "浙江大学": {
+      "year": "2026",
+      "verified": false,
+      "tier": "985",
+      "province": "浙江",
+      "xueshuo": { "total": null, "tongzhao": 9, "tuimian": null, "note": "081200计科统考约9人（较2025年17人减47%），机构来源待官方确认" },
+      "zhuanshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "专硕数据未获取" },
+      "bscore": { "xue": 360, "zhuan": 355 },
+      "sourceUrl": "https://grs.zju.edu.cn",
+      "sourceNote": "机构整理数据，复试线为2025年参考值，待官方核验"
+    },
+    "南京航空航天大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "211",
+      "province": "江苏",
+      "xueshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "人工智能学院081200计科复试线267(上线6人)+083500软工305(上线3人)" },
+      "zhuanshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "085410人工智能复试线361(上线12人)；招生计划数未公布" },
+      "bscore": { "xue": 267, "zhuan": 361 },
+      "sourceUrl": "https://www.graduate.nuaa.edu.cn/2026/0616/c13499a401776/page.htm",
+      "sourceNote": "2026年硕士考生进入复试基本分数线（官方）"
+    },
+    "南京理工大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "211",
+      "province": "江苏",
+      "xueshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "学院全日制拟招315人(含0811控制/0812计科/0835软工/0854电子信息)，计算机类拆分未公布" },
+      "zhuanshuo": { "total": null, "tongzhao": 60, "tuimian": null, "note": "085404计算机技术60人(不含推免)，与085405复试统一划线" },
+      "bscore": { "xue": null, "zhuan": 264 },
+      "sourceUrl": "https://m.koolearn.com/kaoyan/20251014/1886485.html",
+      "sourceNote": "2026年计算机科学与工程学院招生专业目录"
+    },
+    "南京邮电大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "双一流",
+      "province": "江苏",
+      "xueshuo": { "total": 118, "tongzhao": 64, "tuimian": 54, "note": "081200计科录取61(推免33)+083500软工13(推免3)+083900网安44(推免18)" },
+      "zhuanshuo": { "total": 243, "tongzhao": 216, "tuimian": 27, "note": "085404计技录取243(推免27)，报名1496人" },
+      "bscore": { "xue": 303, "zhuan": 339 },
+      "sourceUrl": "https://yz.njupt.edu.cn",
+      "sourceNote": "2026年分专业复试分数线及报考录取情况表"
+    },
+    "杭州电子科技大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "双非",
+      "province": "浙江",
+      "xueshuo": { "total": 164, "tongzhao": 145, "tuimian": 19, "note": "081200计科132(推免18)+083500软工32(推免1)" },
+      "zhuanshuo": { "total": 333, "tongzhao": 304, "tuimian": 29, "note": "085404计技263(推免29)+085405软工70" },
+      "bscore": null,
+      "sourceUrl": "https://grs.hdu.edu.cn/2026/0324/c13270a290579/page.htm",
+      "sourceNote": "研究生院2026年硕士研究生拟招生计划"
+    },
+    "浙江工业大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "双非",
+      "province": "浙江",
+      "xueshuo": { "total": 133, "tongzhao": 118, "tuimian": 15, "note": "081200计科104(推免14/统考90)+083500软工29(推免1/统考28)" },
+      "zhuanshuo": { "total": 231, "tongzhao": 226, "tuimian": 5, "note": "085404计技183(推免4/统考179)+085405软工48(推免1/统考47)，含联培" },
+      "bscore": null,
+      "sourceUrl": "https://www.zjut.edu.cn",
+      "sourceNote": "计算机学院2026年复试、调剂、录取工作方案"
+    },
+    "安徽大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "211",
+      "province": "安徽",
+      "xueshuo": { "total": 195, "tongzhao": 119, "tuimian": 75, "note": "计算机学院0812计科121(统考62/推免58)+0835软工22(统考11/推免11)+人工智能学院0812计科52(统考46/推免6)" },
+      "zhuanshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "官方计划表仅列学术学位，专硕待补充" },
+      "bscore": { "xue": 324, "zhuan": 300 },
+      "sourceUrl": "https://graschool.ahu.edu.cn/2026/0328/c9537a388397/page.htm",
+      "sourceNote": "2026年研究生分专业招生计划（学术学位）"
+    },
+    "合肥工业大学": {
+      "year": "2026",
+      "verified": true,
+      "tier": "211",
+      "province": "安徽",
+      "xueshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "081200计科复试线337；招生计划数未公布" },
+      "zhuanshuo": { "total": null, "tongzhao": null, "tuimian": null, "note": "085404计技复试线358、085410人工智能356；招生计划数未公布" },
+      "bscore": { "xue": 337, "zhuan": 358 },
+      "sourceUrl": "https://yjszs.hfut.edu.cn/2026/0321/c13533a317912/page.psp",
+      "sourceNote": "2026年硕士研究生招生考试复试分数线（官方）"
+    }
+  },
+  "coverageNote": "共收录 11 所院校：985两所(东南大学/浙江大学)、211五所(西电/南航/南理工/安徽大学/合工大)、双一流一所(南邮)、双非三所(西邮/杭电/浙工大)，覆盖陕西、江苏、浙江、安徽四省。其中 8 所已核验招生人数，3 所仅取得官方复试线。院校招生数据每年更新，建议每学年招生简章发布后（9-10月）重新核验一次。"
+}
